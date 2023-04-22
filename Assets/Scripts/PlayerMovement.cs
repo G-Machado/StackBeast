@@ -20,6 +20,14 @@ public class PlayerMovement : MonoBehaviour
     private bool mouseDown;
 
     private bool isPunching = false;
+    [SerializeField] private Transform punchHand;
+    [SerializeField] private float punchRadius;
+    [SerializeField] private float punchForce;
+    private EnemyRagdoll currentEnemy;
+
+    [SerializeField] private ItemsSetup itemsSetup;
+    [SerializeField] private List<EnemyRagdoll> enemiesStacked = new List<EnemyRagdoll>();
+    [SerializeField] private int maxEnemiesStacked = 3;
 
     void Start()
     {
@@ -69,9 +77,11 @@ public class PlayerMovement : MonoBehaviour
 
     private void OnTriggerEnter(Collider other)
     {
-        Debug.Log($"colission with {other.gameObject.name}");
-        if(other.tag == "Enemy")
+        if (other.tag == "Enemy" && !isPunching)
+        {
+            currentEnemy = other.GetComponent<EnemyRagdoll>();
             anim.SetTrigger("PunchTrigger");
+        }
 
         isPunching = true;
         Invoke("SetUnPunch", 1.1f);
@@ -79,6 +89,17 @@ public class PlayerMovement : MonoBehaviour
 
     public void ApplyPunchEffect()
     {
+        currentEnemy.SetRagdoll(true);
+        currentEnemy.ApplyExplosion((currentEnemy.transform.position - transform.position).normalized * punchForce,
+            punchHand.position, punchRadius);
+
+        if (enemiesStacked.Count < maxEnemiesStacked)
+        {
+            int followIndex = enemiesStacked.Count;
+            currentEnemy.followItem = itemsSetup.items[followIndex].transform;
+
+            enemiesStacked.Add(currentEnemy);
+        }
         Debug.Log("PUNCH EFFECT");
     }
 
