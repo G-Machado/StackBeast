@@ -15,6 +15,7 @@ public class EnemyRagdoll : MonoBehaviour
     [SerializeField] private float lockedLerp;
 
     [SerializeField] private bool locked = false;
+    private bool dropped = false;
 
     void Start()
     {
@@ -61,11 +62,15 @@ public class EnemyRagdoll : MonoBehaviour
         if (!followItem) return;
 
         float distanceToItem = Vector3.Distance(followItem.transform.position, bodyRB.transform.position);
-        if (!locked && distanceToItem < .2f)
+        if (!locked && distanceToItem < .3f)
         {
-            SetDrag(5);
             locked = true;
+
+            SetDrag(5);
             bodyRB.constraints = RigidbodyConstraints.FreezePosition;
+
+            if (dropped) followItem = null;
+            //SetRagdoll(false);
         }
 
         if (locked)
@@ -74,9 +79,29 @@ public class EnemyRagdoll : MonoBehaviour
         }
         else
         {
+            SetDrag(Mathf.Max(5 - distanceToItem, .5f));
             Vector3 targetDirection = followItem.transform.position - bodyRB.transform.position;
             bodyRB.velocity =
                 Vector3.Lerp(bodyRB.velocity, targetDirection.normalized * followSpeed, followLerp);
         }
+    }
+
+    public void ApplyDropForce(Vector3 force)
+    {
+        SetDrag(0);
+        bodyRB.constraints = RigidbodyConstraints.None;
+        //bodyRB.AddForce(force, ForceMode.Impulse);
+        bodyRB.drag = 5;
+        bodyRB.mass = 2;
+        bodyRB.velocity = force;
+        bodyRB.AddTorque(force * 10, ForceMode.Impulse);
+    }
+
+    public void DropToPit(float dropUpSpeed)
+    {
+        SetDrag(2);
+        bodyRB.constraints = RigidbodyConstraints.None;
+        bodyRB.velocity = Vector3.up * dropUpSpeed;
+        locked = false;
     }
 }

@@ -15,41 +15,53 @@ public class PlayerMovement : MonoBehaviour
 
     [SerializeField] private Animator anim;
 
+    [Header("Input Variables")]
+    [SerializeField] private float inputGravity = 1;
     private Vector3 inputStartPos;
     private Vector3 currentInput;
     private bool mouseDown;
 
+    [Header("Enemies Punching")]
     private bool isPunching = false;
     [SerializeField] private Transform punchHand;
     [SerializeField] private float punchRadius;
     [SerializeField] private float punchForce;
     private EnemyRagdoll currentEnemy;
 
+    [Header("Enemies Stacking")]
     [SerializeField] private ItemsSetup itemsSetup;
     [SerializeField] private List<EnemyRagdoll> enemiesStacked = new List<EnemyRagdoll>();
     [SerializeField] private int maxEnemiesStacked = 3;
+
+    [Header("Enemies Droping")]
+    private bool isDroping = false;
+    [SerializeField] private float dropForce;
+    [SerializeField] private float dropInterval;
+    [SerializeField] private Transform dropPit;
+    private Coroutine dropEnemiesRoutine;
+    
 
     void Start()
     {
         inputStartPos = Vector3.zero;
     }
 
-    void Update()
+    void FixedUpdate()
     {
         // Handles input
-        if (Input.GetMouseButtonDown(0))
+        if (Input.GetMouseButton(0) && !mouseDown)
         {
             inputStartPos = Input.mousePosition;
             mouseDown = true;
         }
-        if (Input.GetMouseButtonUp(0))
+        if (!Input.GetMouseButton(0) && mouseDown)
         {
             inputStartPos = Vector3.zero;
             mouseDown = false;
             return;
         }
         Vector3 currentMousePos = Input.mousePosition;
-        Vector3 targetInput = mouseDown ? (currentMousePos - inputStartPos) : targetInput = Vector3.zero;
+        Vector3 targetInput = mouseDown ? ((currentMousePos - inputStartPos) * inputGravity) : Vector3.zero;
         currentInput = Vector3.ClampMagnitude(Vector3.Lerp(currentInput, targetInput, .2f), maxSpeed);
 
         // Calculates next position to target
@@ -72,7 +84,10 @@ public class PlayerMovement : MonoBehaviour
         // Configure animation 
         anim.SetFloat("MovBlend", currentInput.magnitude/100);
 
-        if (Input.GetKeyDown(KeyCode.P)) anim.SetTrigger("PunchTrigger");
+
+        // Droping
+        if (Input.GetKeyDown(KeyCode.D)) DropEnemy();
+
     }
 
     private void OnTriggerEnter(Collider other)
@@ -81,10 +96,23 @@ public class PlayerMovement : MonoBehaviour
         {
             currentEnemy = other.GetComponent<EnemyRagdoll>();
             anim.SetTrigger("PunchTrigger");
+            isPunching = true;
         }
-
-        isPunching = true;
+        else if (other.tag == "DropArea" && !isDroping)
+        {
+            isDroping = true;
+            dropEnemiesRoutine = StartCoroutine(DropEnemies());
+        }
         Invoke("SetUnPunch", 1.1f);
+    }
+
+    private void OnTriggerExit(Collider other)
+    {
+        if (other.tag == "DropArea" && isDroping)
+        {
+            isDroping = false;
+            StopCoroutine(dropEnemiesRoutine);
+        }
     }
 
     public void ApplyPunchEffect()
@@ -106,5 +134,29 @@ public class PlayerMovement : MonoBehaviour
     private void SetUnPunch()
     {
         isPunching = false;
+    }
+
+    private IEnumerator DropEnemies()
+    {
+        if (enemiesStacked.Count > 0)
+        {
+            DropEnemy();
+            yield return new WaitForSeconds(dropInterval);
+            StartCoroutine(DropEnemies());
+        }
+    }
+
+    private void DropEnemy()
+    {
+        if (enemiesStacked.Count <= 0) return;
+
+        EnemyRagdoll toDrop = enemiesStacked[enemiesStacked.Count-1];
+
+        Vector3 dropDirection = dropPit.position - toDrop.transform.position;
+        toDrop.SetRagdoll(true);
+        toDrop.followItem = dropPit;
+        toDrop.DropToPit(dropForce * dropDirection.magnitude);
+
+        enemiesStacked.RemoveAt(enemiesStacked.Count - 1);
     }
 }

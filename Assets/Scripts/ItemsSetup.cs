@@ -6,7 +6,7 @@ using UnityEngine;
 public class ItemsSetup : MonoBehaviour
 {
     [SerializeField] private int initialCount = 5;
-    [SerializeField] private float yOffset = 5;
+    [SerializeField] private Vector3 offset;
     [SerializeField] private float yInterval = 5;
     [SerializeField] private GameObject itemPrefab;
     public List<Rigidbody> items = new List<Rigidbody>();
@@ -40,7 +40,7 @@ public class ItemsSetup : MonoBehaviour
     private void SpawnItem()
     {
         Vector3 spawnPos = new Vector3(PlayerMovement.instance.transform.position.x,
-            yOffset + items.Count * yInterval, 0);
+            offset.y + items.Count * yInterval, (PlayerMovement.instance.transform.forward *- offset.z).z);
 
         GameObject itemClone =
             Instantiate(itemPrefab, spawnPos, Quaternion.Euler(-90, 0, 90), this.transform);
