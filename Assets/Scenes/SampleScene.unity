@@ -1879,6 +1879,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   maxSpeed: 70
   movementSpeed: 3
+  punchMovementSpeed: 0.3
   anim: {fileID: 4100038320309293942}
   inputGravity: 100
   punchHand: {fileID: 5641220268072038968}
@@ -4851,10 +4852,6 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
-    - target: {fileID: 8028789197485168437, guid: 3f1c2dc60be824d4bb700233cd025bc5, type: 3}
-      propertyPath: m_Materials.Array.data[0]
-      value: 
-      objectReference: {fileID: 2100000, guid: 7f06251671b1440f48759a3785362f0e, type: 2}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 3f1c2dc60be824d4bb700233cd025bc5, type: 3}
 --- !u!1 &5780732540827228605

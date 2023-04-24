@@ -12,6 +12,7 @@ public class PlayerMovement : MonoBehaviour
 
     [SerializeField] private float maxSpeed;
     [SerializeField] private float movementSpeed;
+    [SerializeField] private float punchMovementSpeed;
 
     [SerializeField] private Animator anim;
 
@@ -65,7 +66,7 @@ public class PlayerMovement : MonoBehaviour
         currentInput = Vector3.ClampMagnitude(Vector3.Lerp(currentInput, targetInput, .2f), maxSpeed);
 
         // Calculates next position to target
-        float finalSpeed = isPunching ? movementSpeed * .3f : movementSpeed;
+        float finalSpeed = isPunching ? punchMovementSpeed : movementSpeed;
         Vector3 targetPos =
             new Vector3(transform.position.x + (currentInput.x * finalSpeed * .01f),
             0,
@@ -97,13 +98,13 @@ public class PlayerMovement : MonoBehaviour
             currentEnemy = other.GetComponent<EnemyRagdoll>();
             anim.SetTrigger("PunchTrigger");
             isPunching = true;
+            Invoke("SetUnPunch", 1.1f);
         }
         else if (other.tag == "DropArea" && !isDroping)
         {
             isDroping = true;
             dropEnemiesRoutine = StartCoroutine(DropEnemies());
         }
-        Invoke("SetUnPunch", 1.1f);
     }
 
     private void OnTriggerExit(Collider other)

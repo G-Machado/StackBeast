@@ -45,7 +45,7 @@ SphereCollider:
   m_IsTrigger: 1
   m_Enabled: 1
   serializedVersion: 2
-  m_Radius: 4
+  m_Radius: 3.5
   m_Center: {x: 0, y: 3.52, z: 0}
 --- !u!114 &5678968153473979797
 MonoBehaviour:
@@ -590,6 +590,10 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 43.464867
       objectReference: {fileID: 0}
+    - target: {fileID: 7359933154242878818, guid: 32caae2bdea0d4ebc9a810d1faaf5208, type: 3}
+      propertyPath: m_Materials.Array.data[0]
+      value: 
+      objectReference: {fileID: 2100000, guid: 7f06251671b1440f48759a3785362f0e, type: 2}
     - target: {fileID: 7399631313732164217, guid: 32caae2bdea0d4ebc9a810d1faaf5208, type: 3}
       propertyPath: m_LocalEulerAnglesHint.x
       value: 33.70737
