@@ -32,7 +32,14 @@ public class PlayerMovement : MonoBehaviour
     [Header("Enemies Stacking")]
     [SerializeField] private ItemsSetup itemsSetup;
     [SerializeField] private List<EnemyRagdoll> enemiesStacked = new List<EnemyRagdoll>();
-    [SerializeField] private int maxEnemiesStacked = 3;
+    private int maxEnemiesStacked
+    {
+        get
+        {
+            return UpgradeManager.instance == null ? 3 :
+                        UpgradeManager.instance.currentStackStats.maxStack;
+        }
+    }
 
     [Header("Enemies Droping")]
     private bool isDroping = false;
@@ -105,6 +112,11 @@ public class PlayerMovement : MonoBehaviour
             isDroping = true;
             dropEnemiesRoutine = StartCoroutine(DropEnemies());
         }
+        else if (other.tag == "UpgradeArea")
+        {
+            other.GetComponent<UpgradeArea>().PurchaseUpgrade();
+        }
+
     }
 
     private void OnTriggerExit(Collider other)
@@ -113,6 +125,10 @@ public class PlayerMovement : MonoBehaviour
         {
             isDroping = false;
             StopCoroutine(dropEnemiesRoutine);
+        }
+        else if (other.tag == "UpgradeArea")
+        {
+            other.GetComponent<UpgradeArea>().ExitArea();
         }
     }
 
@@ -129,7 +145,6 @@ public class PlayerMovement : MonoBehaviour
 
             enemiesStacked.Add(currentEnemy);
         }
-        Debug.Log("PUNCH EFFECT");
     }
 
     private void SetUnPunch()
@@ -137,9 +152,10 @@ public class PlayerMovement : MonoBehaviour
         isPunching = false;
     }
 
+
     private IEnumerator DropEnemies()
     {
-        if (enemiesStacked.Count > 0)
+        if (enemiesStacked.Count > 0 && isDroping)
         {
             DropEnemy();
             yield return new WaitForSeconds(dropInterval);

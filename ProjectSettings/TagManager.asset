@@ -6,6 +6,7 @@ TagManager:
   tags:
   - Enemy
   - DropArea
+  - UpgradeArea
   layers:
   - Default
   - TransparentFX

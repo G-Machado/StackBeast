@@ -5,6 +5,12 @@ using UnityEngine;
 
 public class ItemsSetup : MonoBehaviour
 {
+    public static ItemsSetup instance;
+    private void Awake()
+    {
+        if (instance == null) instance = this;
+    }
+
     [SerializeField] private int initialCount = 5;
     [SerializeField] private Vector3 offset;
     [SerializeField] private float yInterval = 5;
@@ -35,12 +41,14 @@ public class ItemsSetup : MonoBehaviour
             joints[i].GetComponent<Rigidbody>().isKinematic = false;
         }
 
+
+        UpgradeManager.instance.InitializeUpgrades();
     }
 
-    private void SpawnItem()
+    public void SpawnItem()
     {
         Vector3 spawnPos = new Vector3(PlayerMovement.instance.transform.position.x,
-            offset.y + items.Count * yInterval, (PlayerMovement.instance.transform.forward *- offset.z).z);
+            offset.y + items.Count * yInterval, (PlayerMovement.instance.transform.GetChild(0).forward *- offset.z).z);
 
         GameObject itemClone =
             Instantiate(itemPrefab, spawnPos, Quaternion.Euler(-90, 0, 90), this.transform);
