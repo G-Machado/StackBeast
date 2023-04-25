@@ -109,11 +109,13 @@ public class PlayerMovement : MonoBehaviour
         }
         else if (other.tag == "DropArea" && !isDroping)
         {
+            anim.SetFloat("TypeBlend", 1);
             isDroping = true;
             dropEnemiesRoutine = StartCoroutine(DropEnemies());
         }
         else if (other.tag == "UpgradeArea")
         {
+            anim.SetFloat("TypeBlend", 1);
             other.GetComponent<UpgradeArea>().PurchaseUpgrade();
         }
 
@@ -123,11 +125,13 @@ public class PlayerMovement : MonoBehaviour
     {
         if (other.tag == "DropArea" && isDroping)
         {
+            anim.SetFloat("TypeBlend", 0);
             isDroping = false;
             if(dropEnemiesRoutine != null) StopCoroutine(dropEnemiesRoutine);
         }
         else if (other.tag == "UpgradeArea")
         {
+            anim.SetFloat("TypeBlend", 0);
             other.GetComponent<UpgradeArea>().ExitArea();
         }
     }

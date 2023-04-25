@@ -11,11 +11,13 @@ public class ItemsSetup : MonoBehaviour
         if (instance == null) instance = this;
     }
 
+    [Header("Item Spawn")]
     [SerializeField] private int initialCount = 5;
     [SerializeField] private Vector3 offset;
     [SerializeField] private float yInterval = 5;
     [SerializeField] private GameObject itemPrefab;
     public List<Rigidbody> items = new List<Rigidbody>();
+    [SerializeField] private Rigidbody playerRB;
 
     void Start()
     {
@@ -48,7 +50,7 @@ public class ItemsSetup : MonoBehaviour
     public void SpawnItem()
     {
         Vector3 spawnPos = new Vector3(PlayerMovement.instance.transform.position.x,
-            offset.y + items.Count * yInterval, (PlayerMovement.instance.transform.GetChild(0).forward *- offset.z).z);
+            offset.y + items.Count * yInterval, offset.z);
 
         GameObject itemClone =
             Instantiate(itemPrefab, spawnPos, Quaternion.Euler(-90, 0, 90), this.transform);
@@ -57,7 +59,7 @@ public class ItemsSetup : MonoBehaviour
         for (int i = 0; i < hJoints.Length; i++)
         {
             hJoints[i].connectedBody =
-                items.Count <= 0 ? PlayerMovement.instance.GetComponent<Rigidbody>() : items[items.Count - 1];
+                items.Count <= 0 ? playerRB : items[items.Count - 1];
         }
 
         items.Add(itemClone.GetComponent<Rigidbody>());
