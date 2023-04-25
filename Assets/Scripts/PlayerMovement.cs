@@ -17,10 +17,11 @@ public class PlayerMovement : MonoBehaviour
     [SerializeField] private Animator anim;
 
     [Header("Input Variables")]
-    [SerializeField] private float inputGravity = 1;
-    private Vector3 inputStartPos;
-    private Vector3 currentInput;
-    private bool mouseDown;
+    [SerializeField] private JoyStickController controller;
+    //[SerializeField] private float inputGravity = 1;
+    //private Vector3 inputStartPos;
+    //private Vector3 currentInput;
+    //private bool mouseDown;
 
     [Header("Enemies Punching")]
     private bool isPunching = false;
@@ -53,33 +54,17 @@ public class PlayerMovement : MonoBehaviour
 
     void Start()
     {
-        inputStartPos = Vector3.zero;
+
     }
 
     void FixedUpdate()
     {
-        // Handles input
-        if (Input.GetMouseButton(0) && !mouseDown)
-        {
-            inputStartPos = Input.mousePosition;
-            mouseDown = true;
-        }
-        if (!Input.GetMouseButton(0) && mouseDown)
-        {
-            inputStartPos = Vector3.zero;
-            mouseDown = false;
-            return;
-        }
-        Vector3 currentMousePos = Input.mousePosition;
-        Vector3 targetInput = mouseDown ? ((currentMousePos - inputStartPos) * inputGravity) : Vector3.zero;
-        currentInput = Vector3.ClampMagnitude(Vector3.Lerp(currentInput, targetInput, .2f), maxSpeed);
-
         // Calculates next position to target
         float finalSpeed = isPunching ? punchMovementSpeed : movementSpeed;
         Vector3 targetPos =
-            new Vector3(transform.position.x + (currentInput.x * finalSpeed * .01f),
+            new Vector3(transform.position.x + (controller.currentInput.x * finalSpeed * .01f),
             0,
-            transform.position.z + (currentInput.y * finalSpeed * .01f));
+            transform.position.z + (controller.currentInput.y * finalSpeed * .01f));
         transform.position = Vector3.Lerp(transform.position, targetPos, .2f);
 
         // Adjust rotation to movement direction
@@ -88,11 +73,11 @@ public class PlayerMovement : MonoBehaviour
         targetRot.x = 0;
 
         float finalRotLerp = isPunching ? .05f : .2f;
-        if (currentInput.magnitude > .2f)
+        if (controller.currentInput.magnitude > .2f)
             anim.transform.rotation = Quaternion.Lerp(anim.transform.rotation, targetRot, finalRotLerp);
 
         // Configure animation 
-        anim.SetFloat("MovBlend", currentInput.magnitude/100);
+        anim.SetFloat("MovBlend", controller.currentInput.magnitude/100);
         anim.SetFloat("TypeBlend", Mathf.Lerp(anim.GetFloat("TypeBlend"), targetTypeBlend, typeLerp));
 
 
