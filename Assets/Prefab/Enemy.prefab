@@ -67,6 +67,7 @@ MonoBehaviour:
   followLerp: 0.1
   lockedLerp: 0.95
   locked: 0
+  dropped: 0
 --- !u!1001 &668856051874695767
 PrefabInstance:
   m_ObjectHideFlags: 0

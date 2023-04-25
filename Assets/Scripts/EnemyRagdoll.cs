@@ -73,6 +73,8 @@ public class EnemyRagdoll : MonoBehaviour
                 followItem = null;
                 bodyRB.useGravity = true;
                 UpgradeManager.instance.AddCurrency(5);
+                EnemiesSetup.instance.enemies.Remove(this);
+                Destroy(this.gameObject, 10f);
                 return;
             }
             //SetRagdoll(false);

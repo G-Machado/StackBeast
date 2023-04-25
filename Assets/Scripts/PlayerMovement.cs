@@ -47,7 +47,9 @@ public class PlayerMovement : MonoBehaviour
     [SerializeField] private float dropInterval;
     [SerializeField] private Transform dropPit;
     private Coroutine dropEnemiesRoutine;
-    
+    private float targetTypeBlend;
+    [Range(0,1)]
+    [SerializeField] private float typeLerp;
 
     void Start()
     {
@@ -91,6 +93,7 @@ public class PlayerMovement : MonoBehaviour
 
         // Configure animation 
         anim.SetFloat("MovBlend", currentInput.magnitude/100);
+        anim.SetFloat("TypeBlend", Mathf.Lerp(anim.GetFloat("TypeBlend"), targetTypeBlend, typeLerp));
 
 
         // Droping
@@ -109,13 +112,15 @@ public class PlayerMovement : MonoBehaviour
         }
         else if (other.tag == "DropArea" && !isDroping)
         {
-            anim.SetFloat("TypeBlend", 1);
+            targetTypeBlend = 1;
+
             isDroping = true;
             dropEnemiesRoutine = StartCoroutine(DropEnemies());
         }
         else if (other.tag == "UpgradeArea")
         {
-            anim.SetFloat("TypeBlend", 1);
+            targetTypeBlend = 1;
+
             other.GetComponent<UpgradeArea>().PurchaseUpgrade();
         }
 
@@ -125,13 +130,14 @@ public class PlayerMovement : MonoBehaviour
     {
         if (other.tag == "DropArea" && isDroping)
         {
-            anim.SetFloat("TypeBlend", 0);
+            targetTypeBlend = 0;
+
             isDroping = false;
             if(dropEnemiesRoutine != null) StopCoroutine(dropEnemiesRoutine);
         }
         else if (other.tag == "UpgradeArea")
         {
-            anim.SetFloat("TypeBlend", 0);
+            targetTypeBlend = 0;
             other.GetComponent<UpgradeArea>().ExitArea();
         }
     }
