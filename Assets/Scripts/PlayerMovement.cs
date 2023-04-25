@@ -124,7 +124,7 @@ public class PlayerMovement : MonoBehaviour
         if (other.tag == "DropArea" && isDroping)
         {
             isDroping = false;
-            StopCoroutine(dropEnemiesRoutine);
+            if(dropEnemiesRoutine != null) StopCoroutine(dropEnemiesRoutine);
         }
         else if (other.tag == "UpgradeArea")
         {

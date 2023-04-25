@@ -974,15 +974,16 @@ MonoBehaviour:
   currencyDisplay: {fileID: 496930829}
   currency: 0
   stackUpgrades:
-  - cost: 1
+  - cost: 0
     maxStack: 3
   - cost: 10
     maxStack: 5
   - cost: 100
     maxStack: 10
   stackLevel: -1
+  stackCostDisplay: {fileID: 787027565}
   punchUpgrades:
-  - cost: 1
+  - cost: 0
     punchRadius: 6
     punchForce: 250
   - cost: 45
@@ -992,6 +993,7 @@ MonoBehaviour:
     punchRadius: 12
     punchForce: 500
   punchLevel: -1
+  punchCostDisplay: {fileID: 1959688951}
 --- !u!4 &264287113
 Transform:
   m_ObjectHideFlags: 0

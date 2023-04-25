@@ -15,7 +15,6 @@ public class UpgradeArea : MonoBehaviour
         if (disabled) return;
 
         purchaseEnabled = false;
-        fieldAnim.SetBool("fade", purchaseEnabled);
         OnUpgradePurchase?.Invoke(this);
     }
 
@@ -24,13 +23,23 @@ public class UpgradeArea : MonoBehaviour
         if (disabled) return;
 
         purchaseEnabled = true;
-        fieldAnim.SetBool("fade", purchaseEnabled);
+        fieldAnim.SetBool("fade", true);
     }
 
     public void DeactivateArea()
     {
         fieldAnim.SetBool("fade", false);
         disabled = true;
+    }
+
+    public void RefuseUpgrade()
+    {
+        fieldAnim.SetTrigger("refused");
+    }
+
+    public void ProcessPurchase()
+    {
+        fieldAnim.SetBool("fade", false);
     }
 }
 
