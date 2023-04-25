@@ -15,7 +15,11 @@ public class EnemyRagdoll : MonoBehaviour
     [SerializeField] private float lockedLerp;
 
     [SerializeField] private bool locked = false;
-    [SerializeField] private bool dropped = false;
+    public bool dropped = false;
+    public bool punched = false;
+
+    [Header("FX Variables")]
+    public TrailRenderer[] trails;
 
     void Start()
     {
@@ -36,6 +40,27 @@ public class EnemyRagdoll : MonoBehaviour
         {
             parts[i].isKinematic = !mode;
         }
+
+        SetTrails(mode);
+    }
+
+    private void SetTrails(bool mode )
+    {
+        // Setup all trails mode
+        for (int i = 0; i < trails.Length; i++)
+        {
+            trails[i].enabled = mode;
+        }
+
+        // If turning on trails, disable 0 to 2 random trails to give some variation
+        if(mode)
+        {
+            for (int i = 0; i < Random.Range(trails.Length/3, trails.Length); i++)
+            {
+                int randomIndex = Random.Range(0, trails.Length);
+                trails[randomIndex].enabled = false;
+            }
+        }
     }
 
     public void ApplyExplosion(Vector3 forceVector, Vector3 origin, float radius)
@@ -46,6 +71,7 @@ public class EnemyRagdoll : MonoBehaviour
         }
 
         bodyRB.useGravity = false;
+        punched = true;
         GetComponent<SphereCollider>().enabled = false;
     }
 
@@ -62,11 +88,13 @@ public class EnemyRagdoll : MonoBehaviour
         if (!followItem) return;
 
         float distanceToItem = Vector3.Distance(followItem.transform.position, bodyRB.transform.position);
-        if (!locked && distanceToItem < (!dropped ? .3f : 5.5f))
+        if (!locked && distanceToItem < (!dropped ? .5f : 5.5f))
         {
             locked = true;
             SetDrag(5);
             bodyRB.constraints = RigidbodyConstraints.FreezePosition;
+
+            SetTrails(false);
 
             if (dropped)
             {
@@ -77,7 +105,6 @@ public class EnemyRagdoll : MonoBehaviour
                 Destroy(this.gameObject, 10f);
                 return;
             }
-            //SetRagdoll(false);
         }
 
         if (locked)

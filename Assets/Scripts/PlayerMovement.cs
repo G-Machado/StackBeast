@@ -26,13 +26,10 @@ public class PlayerMovement : MonoBehaviour
     [Header("Enemies Punching")]
     private bool isPunching = false;
     [SerializeField] private Transform punchHand;
-    [SerializeField] private float punchRadius;
-    [SerializeField] private float punchForce;
-    private EnemyRagdoll currentEnemy;
 
     [Header("Enemies Stacking")]
     [SerializeField] private ItemsSetup itemsSetup;
-    [SerializeField] private List<EnemyRagdoll> enemiesStacked = new List<EnemyRagdoll>();
+    public List<EnemyRagdoll> enemiesStacked = new List<EnemyRagdoll>();
     private int maxEnemiesStacked
     {
         get
@@ -72,28 +69,28 @@ public class PlayerMovement : MonoBehaviour
         targetRot.z = 0;
         targetRot.x = 0;
 
-        float finalRotLerp = isPunching ? .05f : .2f;
+        float finalRotLerp = isPunching ? .05f : .3f;
         if (controller.currentInput.magnitude > .2f)
             anim.transform.rotation = Quaternion.Lerp(anim.transform.rotation, targetRot, finalRotLerp);
 
         // Configure animation 
         anim.SetFloat("MovBlend", controller.currentInput.magnitude/100);
         anim.SetFloat("TypeBlend", Mathf.Lerp(anim.GetFloat("TypeBlend"), targetTypeBlend, typeLerp));
-
-
-        // Droping
-        if (Input.GetKeyDown(KeyCode.D)) DropEnemy();
-
     }
+
+
+    // -- Collision interactions
 
     private void OnTriggerEnter(Collider other)
     {
         if (other.tag == "Enemy" && !isPunching)
         {
-            currentEnemy = other.GetComponent<EnemyRagdoll>();
-            anim.SetTrigger("PunchTrigger");
-            isPunching = true;
-            Invoke("SetUnPunch", 1.1f);
+            StartPunch();
+        }
+        else if (other.tag == "EnemyFallen" && !isPunching)
+        {
+            EnemyRagdoll enemy = other.transform.parent.GetComponentInParent<EnemyRagdoll>();
+            if(!enemiesStacked.Contains(enemy) && !enemy.dropped) TryCollectEnemy(enemy);
         }
         else if (other.tag == "DropArea" && !isDroping)
         {
@@ -127,19 +124,51 @@ public class PlayerMovement : MonoBehaviour
         }
     }
 
+
+    // -- Punch mechanics
+
+    private void StartPunch()
+    {
+        anim.SetTrigger("PunchTrigger");
+        isPunching = true;
+        Invoke("SetUnPunch", 1.1f);
+    }
     public void ApplyPunchEffect()
     {
-        currentEnemy.SetRagdoll(true);
-        currentEnemy.ApplyExplosion((currentEnemy.transform.position - transform.position).normalized * punchForce,
-            punchHand.position, punchRadius);
+        float punchRadius = UpgradeManager.instance.currentPunchStats.punchRadius;
+        float punchForce = UpgradeManager.instance.currentPunchStats.punchForce;
+        Collider[] enemies = Physics.OverlapSphere(punchHand.position, punchRadius * .6f, 1 << 8);
+        for (int i = 0; i < enemies.Length; i++)
+        {
+            EnemyRagdoll currentEnemy = enemies[i].GetComponent<EnemyRagdoll>();
+            currentEnemy.SetRagdoll(true);
+            currentEnemy.ApplyExplosion((currentEnemy.transform.position - transform.position).normalized * punchForce,
+                punchHand.position, punchRadius);
 
+            //if (enemiesStacked.Count < maxEnemiesStacked)
+            //{
+            //    int followIndex = enemiesStacked.Count;
+            //    currentEnemy.followItem = itemsSetup.items[followIndex].transform;
+
+            //    enemiesStacked.Add(currentEnemy);
+            //}
+            TryCollectEnemy(currentEnemy);
+        }
+    }
+
+    private bool TryCollectEnemy(EnemyRagdoll currentEnemy)
+    {
         if (enemiesStacked.Count < maxEnemiesStacked)
         {
             int followIndex = enemiesStacked.Count;
             currentEnemy.followItem = itemsSetup.items[followIndex].transform;
 
             enemiesStacked.Add(currentEnemy);
+
+            return true;
         }
+
+        return false;
     }
 
     private void SetUnPunch()
@@ -147,6 +176,8 @@ public class PlayerMovement : MonoBehaviour
         isPunching = false;
     }
 
+
+    // -- Droping mechanics
 
     private IEnumerator DropEnemies()
     {
