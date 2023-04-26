@@ -4,11 +4,9 @@ using UnityEngine;
 
 public class AnimEffects : MonoBehaviour
 {
+    // Triggers punch explosion effect at player's script
     public void PunchEffect()
     {
-        PlayerMovement player = transform.parent.GetComponent<PlayerMovement>();
-        if(!player) { Debug.LogError("PlayerMovement component not found."); return; }
-
-        player.ApplyPunchEffect();
+        PlayerMovement.instance.ApplyPunchEffect();
     }
 }

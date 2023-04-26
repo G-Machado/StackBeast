@@ -56,6 +56,17 @@ public class PlayerMovement : MonoBehaviour
 
     void FixedUpdate()
     {
+        MoveAndRotate();
+
+        // Configure animation blends
+        anim.SetFloat("MovBlend", controller.currentInput.magnitude/100);
+        anim.SetFloat("TypeBlend", Mathf.Lerp(anim.GetFloat("TypeBlend"), targetTypeBlend, typeLerp));
+    }
+
+    // -- Movement logics
+
+    private void MoveAndRotate()
+    {
         // Calculates next position to target
         float finalSpeed = isPunching ? punchMovementSpeed : movementSpeed;
         Vector3 targetPos =
@@ -72,10 +83,6 @@ public class PlayerMovement : MonoBehaviour
         float finalRotLerp = isPunching ? .05f : .3f;
         if (controller.currentInput.magnitude > .2f)
             anim.transform.rotation = Quaternion.Lerp(anim.transform.rotation, targetRot, finalRotLerp);
-
-        // Configure animation 
-        anim.SetFloat("MovBlend", controller.currentInput.magnitude/100);
-        anim.SetFloat("TypeBlend", Mathf.Lerp(anim.GetFloat("TypeBlend"), targetTypeBlend, typeLerp));
     }
 
 
@@ -94,6 +101,8 @@ public class PlayerMovement : MonoBehaviour
         }
         else if (other.tag == "DropArea" && !isDroping)
         {
+            dropPit = other.transform.GetChild(0);
+
             targetTypeBlend = 1;
 
             isDroping = true;
@@ -133,6 +142,7 @@ public class PlayerMovement : MonoBehaviour
         isPunching = true;
         Invoke("SetUnPunch", 1.1f);
     }
+
     public void ApplyPunchEffect()
     {
         float punchRadius = UpgradeManager.instance.currentPunchStats.punchRadius;
@@ -144,6 +154,8 @@ public class PlayerMovement : MonoBehaviour
             currentEnemy.SetRagdoll(true);
             currentEnemy.ApplyExplosion((currentEnemy.transform.position - transform.position).normalized * punchForce,
                 punchHand.position, punchRadius);
+
+            SpawnPunchExplosion();
 
             //if (enemiesStacked.Count < maxEnemiesStacked)
             //{
@@ -176,6 +188,12 @@ public class PlayerMovement : MonoBehaviour
         isPunching = false;
     }
 
+    private void SpawnPunchExplosion()
+    {
+        GameObject explosionClone =
+            Instantiate(UpgradeManager.instance.currentPunchStats.explosionEffect, punchHand.position, Quaternion.identity);
+        Destroy(explosionClone, 2f);
+    }
 
     // -- Droping mechanics
 

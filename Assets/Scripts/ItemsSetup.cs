@@ -35,14 +35,9 @@ public class ItemsSetup : MonoBehaviour
             JointSpring spring = new JointSpring();
             spring.damper = 5 + .5f * i;
             spring.spring = 700 + i * 20;
-            //joints[i].spring = spring;
-
-            // Configure rb's drag increasing with heigth
-            //joints[i].GetComponent<Rigidbody>().drag = 2 + i * .5f;
 
             joints[i].GetComponent<Rigidbody>().isKinematic = false;
         }
-
 
         UpgradeManager.instance.InitializeUpgrades();
     }

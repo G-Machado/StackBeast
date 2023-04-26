@@ -26,7 +26,7 @@ public class JoyStickController : MonoBehaviour
         inputStartPos = Vector3.zero;
     }
 
-    void Update()
+    void FixedUpdate()
     {
         // Handles input
         if (Input.GetMouseButton(0) && !mouseDown)
@@ -51,7 +51,7 @@ public class JoyStickController : MonoBehaviour
         Vector3 targetInput = mouseDown ? ((currentMousePos - currentJoystickPos)) : Vector3.zero;
 
         // Move joystick and redefines start pos
-        if(targetInput.magnitude > maxInput * 2)
+        if(targetInput.magnitude > maxInput * 2.5f)
         {
             rect.anchoredPosition = Vector3.Lerp(rect.anchoredPosition, Input.mousePosition, dragLerp);
         }

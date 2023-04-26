@@ -9,6 +9,7 @@ public class EnemyRagdoll : MonoBehaviour
     [SerializeField] private bool ragActive = false;
     [SerializeField] private Animator anim;
     public Transform followItem;
+    [SerializeField] private SphereCollider sphereCollider;
     [SerializeField] private Rigidbody bodyRB;
     [SerializeField] private float followSpeed;
     [SerializeField] private float followLerp;
@@ -72,7 +73,7 @@ public class EnemyRagdoll : MonoBehaviour
 
         bodyRB.useGravity = false;
         punched = true;
-        GetComponent<SphereCollider>().enabled = false;
+        sphereCollider.enabled = false;
     }
 
     private void SetDrag(float value)
@@ -87,26 +88,26 @@ public class EnemyRagdoll : MonoBehaviour
     {
         if (!followItem) return;
 
+        // Checks for locking distance to target
         float distanceToItem = Vector3.Distance(followItem.transform.position, bodyRB.transform.position);
-        if (!locked && distanceToItem < (!dropped ? .5f : 5.5f))
+        if (!locked && distanceToItem < (!dropped ? .5f : 3.5f))
         {
             locked = true;
-            SetDrag(5);
-            bodyRB.constraints = RigidbodyConstraints.FreezePosition;
-
             SetTrails(false);
 
             if (dropped)
             {
-                followItem = null;
-                bodyRB.useGravity = true;
-                UpgradeManager.instance.AddCurrency(5);
-                EnemiesSetup.instance.enemies.Remove(this);
-                Destroy(this.gameObject, 10f);
+                DropDead();
                 return;
+            }
+            else
+            {
+                SetDrag(5);
+                bodyRB.constraints = RigidbodyConstraints.FreezePosition;
             }
         }
 
+        // Move enemy to target position depending on state (i.e. locked or unlocked)
         if (locked)
         {
             bodyRB.MovePosition(Vector3.Lerp(bodyRB.position, followItem.transform.position, lockedLerp));
@@ -118,6 +119,24 @@ public class EnemyRagdoll : MonoBehaviour
             bodyRB.velocity =
                 Vector3.Lerp(bodyRB.velocity, targetDirection.normalized * followSpeed, followLerp);
         }
+    }
+
+    private void DropDead()
+    {
+        followItem = null;
+
+        // Configure rigidbodies
+        SetDrag(1);
+        bodyRB.useGravity = true;
+        bodyRB.mass = 10;
+        bodyRB.drag = 4;
+        bodyRB.constraints = RigidbodyConstraints.None;
+
+        EnemiesSetup.instance.enemies.Remove(this);
+
+        Destroy(this.gameObject, 10f);
+
+        UpgradeManager.instance.AddCurrency(5);
     }
 
     public void DropToPit(float dropUpSpeed)

@@ -26,6 +26,7 @@ public class UpgradeManager : MonoBehaviour
         get { return stackLevel >= 0 ? stackUpgrades[stackLevel] : null; }
     }
     [SerializeField] private TextMeshProUGUI stackCostDisplay;
+    [SerializeField] private SkinnedMeshRenderer skinned_renderer;
 
     [Header("Punch Upgrades")]
     public List<punchStat> punchUpgrades = new List<punchStat>();
@@ -77,6 +78,9 @@ public class UpgradeManager : MonoBehaviour
         }
 
         currency -= currentStackStats.cost;
+        PlayerMovement.instance.GetComponentsInChildren<SkinnedMeshRenderer>()[0].material.color =
+            currentStackStats.color;
+
         UpdateUIStats();
 
         if (stackLevel >= stackUpgrades.Count - 1)
@@ -121,6 +125,7 @@ public class stackStat
 {
     public int cost;
     public int maxStack;
+    public Color color;
 }
 
 [System.Serializable]
@@ -129,4 +134,5 @@ public class punchStat
     public int cost;
     public int punchRadius;
     public int punchForce;
+    public GameObject explosionEffect;
 }
