@@ -7,6 +7,6 @@ public class AnimEffects : MonoBehaviour
     // Triggers punch explosion effect at player's script
     public void PunchEffect()
     {
-        PlayerMovement.instance.ApplyPunchEffect();
+        PlayerController.instance.ApplyPunchEffect();
     }
 }

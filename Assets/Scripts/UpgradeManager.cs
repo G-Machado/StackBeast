@@ -28,7 +28,7 @@ public class UpgradeManager : MonoBehaviour
     [SerializeField] private TextMeshProUGUI stackValueDisplay;
     [SerializeField] private Animator stackDisplayAnim;
     [SerializeField] private TextMeshProUGUI stackCostDisplay;
-    [SerializeField] private SkinnedMeshRenderer skinned_renderer;
+    [SerializeField] private SkinnedMeshRenderer[] skinned_renderers;
 
     [Header("Punch Upgrades")]
     public List<punchStat> punchUpgrades = new List<punchStat>();
@@ -50,7 +50,7 @@ public class UpgradeManager : MonoBehaviour
 
     public void UpdateStackUI()
     {
-        stackValueDisplay.text = $"{PlayerMovement.instance.enemiesStacked.Count}/{currentStackStats.maxStack}";
+        stackValueDisplay.text = $"{PlayerController.instance.enemiesStacked.Count}/{currentStackStats.maxStack}";
         stackDisplayAnim.SetTrigger("uiChange");
     }
 
@@ -97,8 +97,10 @@ public class UpgradeManager : MonoBehaviour
         UpdateStackUI();
 
         // Updates player skin color
-        skinned_renderer.material.color =
-            currentStackStats.color;
+        for (int i = 0; i < skinned_renderers.Length; i++)
+        {
+            skinned_renderers[i].material.color = currentStackStats.color;
+        }
 
         // Configure upgrade area if this was the last upgrade possible
         if (stackLevel >= stackUpgrades.Count - 1)

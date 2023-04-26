@@ -46,7 +46,7 @@ public class ItemsSetup : MonoBehaviour
 
     public void SpawnItem()
     {
-        Vector3 spawnPos = new Vector3(PlayerMovement.instance.transform.position.x,
+        Vector3 spawnPos = new Vector3(PlayerController.instance.transform.position.x,
             offset.y + items.Count * yInterval, offset.z);
 
         GameObject itemClone =

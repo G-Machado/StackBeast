@@ -17,8 +17,8 @@ public class CameraController : MonoBehaviour
     void Start()
     {
         // Initialize min offset and max offset calculations
-        offset = transform.position - PlayerMovement.instance.transform.position;
-        maxOffset =  maxStackPos - PlayerMovement.instance.transform.position;
+        offset = transform.position - PlayerController.instance.transform.position;
+        maxOffset =  maxStackPos - PlayerController.instance.transform.position;
 
         // Initialize smooth input value
         smoothInput = inputController.currentInput;
@@ -30,10 +30,10 @@ public class CameraController : MonoBehaviour
         smoothInput = Vector3.Lerp(smoothInput, inputController.currentInput, .2f);
 
         // Calculates the current offset relative to amount of enemies stacked
-        Vector3 finalOffset = Vector3.Lerp(offset, maxOffset, PlayerMovement.instance.enemiesStacked.Count / (.01f + 20));
+        Vector3 finalOffset = Vector3.Lerp(offset, maxOffset, PlayerController.instance.enemiesStacked.Count / (.01f + 20));
 
         // Calculates the final position using input and offset
-        Vector3 targetPos = PlayerMovement.instance.transform.position +
+        Vector3 targetPos = PlayerController.instance.transform.position +
             new Vector3(smoothInput.x, 0, smoothInput.y).normalized * movRange
             + finalOffset;
 

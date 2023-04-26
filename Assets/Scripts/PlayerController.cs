@@ -2,18 +2,18 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class PlayerMovement : MonoBehaviour
+public class PlayerController : MonoBehaviour
 {
-    public static PlayerMovement instance;
+    public static PlayerController instance;
     private void Awake()
     {
         instance = this;
     }
 
+    [Header("Movement Variables")]
     [SerializeField] private float maxSpeed;
     [SerializeField] private float movementSpeed;
     [SerializeField] private float punchMovementSpeed;
-
     [SerializeField] private Animator anim;
 
     [Header("Input Variables")]
@@ -85,15 +85,15 @@ public class PlayerMovement : MonoBehaviour
 
     private void OnTriggerEnter(Collider other)
     {
+        Debug.Log(other.transform.name);
         if (other.tag == "Enemy" && !isPunching)
         {
             StartPunch();
         }
         else if (other.tag == "EnemyFallen" && !isPunching)
         {
-            // Try collect falled enemy ( if has space at stack )
-            EnemyRagdoll enemy = other.transform.parent.GetComponentInParent<EnemyRagdoll>();
-            if(!enemiesStacked.Contains(enemy) && !enemy.dropped) TryCollectEnemy(enemy);
+            // Try collect falled enemy
+            TryCollectEnemy(other.transform.parent.GetComponentInParent<EnemyRagdoll>());
         }
         else if (other.tag == "DropArea" && !isDroping)
         {
@@ -167,6 +167,8 @@ public class PlayerMovement : MonoBehaviour
 
     private bool TryCollectEnemy(EnemyRagdoll currentEnemy)
     {
+        if (enemiesStacked.Contains(currentEnemy) || currentEnemy.dropped) return false;
+
         if (enemiesStacked.Count < maxEnemiesStacked)
         {
             int followIndex = enemiesStacked.Count;

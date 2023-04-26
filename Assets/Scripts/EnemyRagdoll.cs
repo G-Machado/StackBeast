@@ -5,6 +5,7 @@ using static UnityEngine.UI.Image;
 
 public class EnemyRagdoll : MonoBehaviour
 {
+
     [SerializeField]private Rigidbody[] parts;
     private Vector3[] initialPartsPos;
     private Quaternion[] initialPartsRot;
