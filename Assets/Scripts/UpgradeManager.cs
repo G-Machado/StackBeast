@@ -20,7 +20,6 @@ public class UpgradeManager : MonoBehaviour
 
     [Header("Stacking Upgrades")]
     public List<stackStat> stackUpgrades = new List<stackStat>();
-    
     public int stackLevel = -1;
     public stackStat currentStackStats
     {
@@ -33,7 +32,6 @@ public class UpgradeManager : MonoBehaviour
 
     [Header("Punch Upgrades")]
     public List<punchStat> punchUpgrades = new List<punchStat>();
-    
     public int punchLevel = -1;
     public punchStat currentPunchStats
     {
@@ -43,20 +41,24 @@ public class UpgradeManager : MonoBehaviour
     [SerializeField] private TextMeshProUGUI punchCostDisplay;
     [SerializeField] private Animator punchDisplasyAnim;
 
-    void Start()
-    {
-        // LoadData();
-    }
-
     public void InitializeUpgrades()
     {
+        // Upgrade stack and punch to level 0
         UpgradeStack(null);
         UpgradePunch(null);
+    }
+
+    public void UpdateStackUI()
+    {
+        stackValueDisplay.text = $"{PlayerMovement.instance.enemiesStacked.Count}/{currentStackStats.maxStack}";
+        stackDisplayAnim.SetTrigger("uiChange");
     }
 
     public void AddCurrency(int ammount)
     {
         currency += ammount;
+
+        // Updates UI
         currencyDisplay.text = $"${currency}";
         currencyDisplayAnim.SetTrigger("uiChange");
     }
@@ -65,6 +67,7 @@ public class UpgradeManager : MonoBehaviour
     {
         stackLevel++;
 
+        // Configure upgrade area if player doesn't have money
         if (currency < currentStackStats.cost)
         {
             stackLevel--;
@@ -72,6 +75,7 @@ public class UpgradeManager : MonoBehaviour
             return;
         }
 
+        // Configure upgrade area if a purchase is sucessfull
         if (area) area.ProcessPurchase();
 
         // Shows new items to stack
@@ -83,16 +87,20 @@ public class UpgradeManager : MonoBehaviour
             ItemsSetup.instance.items[i].GetComponent<MeshRenderer>().enabled = meshEnabled;
         }
 
+        // Updates currency
         currency -= currentStackStats.cost;
+
+        // Updates UI
         currencyDisplay.text = $"${currency}";
         currencyDisplayAnim.SetTrigger("uiChange");
+        stackCostDisplay.text = $"${stackUpgrades[Mathf.Min(stackUpgrades.Count - 1, stackLevel + 1)].cost}";
+        UpdateStackUI();
 
+        // Updates player skin color
         skinned_renderer.material.color =
             currentStackStats.color;
 
-        stackCostDisplay.text = $"${stackUpgrades[Mathf.Min(stackUpgrades.Count - 1, stackLevel + 1)].cost}";
-        //UpdateUIStats();
-
+        // Configure upgrade area if this was the last upgrade possible
         if (stackLevel >= stackUpgrades.Count - 1)
         {
             if (area) area.DeactivateArea();
@@ -130,16 +138,8 @@ public class UpgradeManager : MonoBehaviour
         }
     }
 
-    public void UpdateUIStats()
-    {
-        stackValueDisplay.text = $"{PlayerMovement.instance.enemiesStacked.Count}/{currentStackStats.maxStack}";
-        stackDisplayAnim.SetTrigger("uiChange");
-        //currencyDisplay.text = currency.ToString();
-        //stackCostDisplay.text = $"${stackUpgrades[Mathf.Min(stackUpgrades.Count - 1, stackLevel + 1)].cost}";
-        //stackValueDisplay.text = $"{PlayerMovement.instance.enemiesStacked.Count}/{currentStackStats.maxStack}";
-        //punchCostDisplay.text = $"${punchUpgrades[Mathf.Min(punchUpgrades.Count - 1, punchLevel + 1)].cost}";
-        //punchValueDisplay.text = $"{punchLevel + 1}";
-    }
+
+    
 
 }
 

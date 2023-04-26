@@ -11,11 +11,13 @@ public class ItemsSetup : MonoBehaviour
         if (instance == null) instance = this;
     }
 
-    [Header("Item Spawn")]
-    [SerializeField] private int initialCount = 5;
-    [SerializeField] private Vector3 offset;
-    [SerializeField] private float yInterval = 5;
+    [Header("Spawn Variables")]
     [SerializeField] private GameObject itemPrefab;
+    [SerializeField] private Vector3 offset;
+
+    [Header("Stack Varialbes")]
+    [SerializeField] private int initialCount = 5;
+    [SerializeField] private float yInterval = 5;
     public List<Rigidbody> items = new List<Rigidbody>();
     [SerializeField] private Rigidbody playerRB;
 
@@ -50,6 +52,7 @@ public class ItemsSetup : MonoBehaviour
         GameObject itemClone =
             Instantiate(itemPrefab, spawnPos, Quaternion.Euler(-90, 0, 90), this.transform);
 
+        // Configure the hinge joints present at stack item clone
         HingeJoint[] hJoints = itemClone.GetComponents<HingeJoint>();
         for (int i = 0; i < hJoints.Length; i++)
         {

@@ -11,7 +11,7 @@ public class UpgradeArea : MonoBehaviour
     [SerializeField] private bool disabled = false;
     [SerializeField] private GameObject costUI;
 
-    public void PurchaseUpgrade()
+    public void TryPurchaseUpgrade()
     {
         if (disabled) return;
 
@@ -23,7 +23,9 @@ public class UpgradeArea : MonoBehaviour
     {
         if (disabled) return;
 
+        // Reanables purchase attempt
         purchaseEnabled = true;
+
         fieldAnim.SetBool("fade", true);
         fieldAnim.SetBool("refused", false);
         costUI.SetActive(true);
@@ -32,6 +34,8 @@ public class UpgradeArea : MonoBehaviour
     public void DeactivateArea()
     {
         fieldAnim.SetBool("fade", false);
+
+        // Disables completely the upgrade area
         disabled = true;
     }
 

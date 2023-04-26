@@ -18,10 +18,6 @@ public class PlayerMovement : MonoBehaviour
 
     [Header("Input Variables")]
     [SerializeField] private JoyStickController controller;
-    //[SerializeField] private float inputGravity = 1;
-    //private Vector3 inputStartPos;
-    //private Vector3 currentInput;
-    //private bool mouseDown;
 
     [Header("Enemies Punching")]
     private bool isPunching = false;
@@ -49,18 +45,10 @@ public class PlayerMovement : MonoBehaviour
     [Range(0,1)]
     [SerializeField] private float typeLerp;
 
-    void Start()
-    {
-
-    }
-
     void FixedUpdate()
     {
         MoveAndRotate();
-
-        // Configure animation blends
-        anim.SetFloat("MovBlend", controller.currentInput.magnitude/100);
-        anim.SetFloat("TypeBlend", Mathf.Lerp(anim.GetFloat("TypeBlend"), targetTypeBlend, typeLerp));
+        UpdateAnim();
     }
 
     // -- Movement logics
@@ -85,6 +73,13 @@ public class PlayerMovement : MonoBehaviour
             anim.transform.rotation = Quaternion.Lerp(anim.transform.rotation, targetRot, finalRotLerp);
     }
 
+    private void UpdateAnim()
+    {
+        // Configure animation blends
+        anim.SetFloat("MovBlend", controller.currentInput.magnitude / 100);
+        anim.SetFloat("TypeBlend", Mathf.Lerp(anim.GetFloat("TypeBlend"), targetTypeBlend, typeLerp));
+    }
+
 
     // -- Collision interactions
 
@@ -96,13 +91,14 @@ public class PlayerMovement : MonoBehaviour
         }
         else if (other.tag == "EnemyFallen" && !isPunching)
         {
+            // Try collect falled enemy ( if has space at stack )
             EnemyRagdoll enemy = other.transform.parent.GetComponentInParent<EnemyRagdoll>();
             if(!enemiesStacked.Contains(enemy) && !enemy.dropped) TryCollectEnemy(enemy);
         }
         else if (other.tag == "DropArea" && !isDroping)
         {
+            // Start dropping enemies at pit
             dropPit = other.transform.GetChild(0);
-
             targetTypeBlend = 1;
 
             isDroping = true;
@@ -110,9 +106,9 @@ public class PlayerMovement : MonoBehaviour
         }
         else if (other.tag == "UpgradeArea")
         {
+            // Trigger the attempt to purchase
             targetTypeBlend = 1;
-
-            other.GetComponent<UpgradeArea>().PurchaseUpgrade();
+            other.GetComponent<UpgradeArea>().TryPurchaseUpgrade();
         }
 
     }
@@ -121,13 +117,14 @@ public class PlayerMovement : MonoBehaviour
     {
         if (other.tag == "DropArea" && isDroping)
         {
+            // Stop dropping the enemies
             targetTypeBlend = 0;
-
             isDroping = false;
             if(dropEnemiesRoutine != null) StopCoroutine(dropEnemiesRoutine);
         }
         else if (other.tag == "UpgradeArea")
         {
+            // Triggers activation when leaving upgrade area
             targetTypeBlend = 0;
             other.GetComponent<UpgradeArea>().ExitArea();
         }
@@ -138,15 +135,21 @@ public class PlayerMovement : MonoBehaviour
 
     private void StartPunch()
     {
+        // Start punch animation
         anim.SetTrigger("PunchTrigger");
         isPunching = true;
+
+        // Call end of punch state
         Invoke("SetUnPunch", 1.1f);
     }
 
     public void ApplyPunchEffect()
     {
+        // Calculate punch values
         float punchRadius = UpgradeManager.instance.currentPunchStats.punchRadius;
         float punchForce = UpgradeManager.instance.currentPunchStats.punchForce;
+
+        // Get enemies in punch explosion area and apply effect
         Collider[] enemies = Physics.OverlapSphere(punchHand.position, punchRadius * .6f, 1 << 8);
         for (int i = 0; i < enemies.Length; i++)
         {
@@ -155,15 +158,9 @@ public class PlayerMovement : MonoBehaviour
             currentEnemy.ApplyExplosion((currentEnemy.transform.position - transform.position).normalized * punchForce,
                 punchHand.position, punchRadius);
 
-            SpawnPunchExplosion();
+            SpawnPunchExplosionFX();
 
-            //if (enemiesStacked.Count < maxEnemiesStacked)
-            //{
-            //    int followIndex = enemiesStacked.Count;
-            //    currentEnemy.followItem = itemsSetup.items[followIndex].transform;
-
-            //    enemiesStacked.Add(currentEnemy);
-            //}
+            // Try collect punched enemy ( if has space at stack )
             TryCollectEnemy(currentEnemy);
         }
     }
@@ -176,7 +173,7 @@ public class PlayerMovement : MonoBehaviour
             currentEnemy.followItem = itemsSetup.items[followIndex].transform;
 
             enemiesStacked.Add(currentEnemy);
-            UpgradeManager.instance.UpdateUIStats();
+            UpgradeManager.instance.UpdateStackUI();
 
             return true;
         }
@@ -189,7 +186,7 @@ public class PlayerMovement : MonoBehaviour
         isPunching = false;
     }
 
-    private void SpawnPunchExplosion()
+    private void SpawnPunchExplosionFX()
     {
         GameObject explosionClone =
             Instantiate(UpgradeManager.instance.currentPunchStats.explosionEffect, punchHand.position, Quaternion.identity);
@@ -200,6 +197,7 @@ public class PlayerMovement : MonoBehaviour
 
     private IEnumerator DropEnemies()
     {
+        // While there are enemies at player's stack, keep droping them at 'dropInterval'
         if (enemiesStacked.Count > 0 && isDroping)
         {
             DropEnemy();
@@ -214,12 +212,12 @@ public class PlayerMovement : MonoBehaviour
 
         EnemyRagdoll toDrop = enemiesStacked[enemiesStacked.Count-1];
 
-        Vector3 dropDirection = dropPit.position - toDrop.transform.position;
+        // Configure and triggers enemy ragdoll to drop at pit
         toDrop.SetRagdoll(true);
         toDrop.followItem = dropPit;
-        toDrop.DropToPit(dropForce * dropDirection.magnitude);
+        toDrop.DropToPit(dropForce * (dropPit.position - toDrop.transform.position).magnitude);
 
         enemiesStacked.RemoveAt(enemiesStacked.Count - 1);
-        UpgradeManager.instance.UpdateUIStats();
+        UpgradeManager.instance.UpdateStackUI();
     }
 }

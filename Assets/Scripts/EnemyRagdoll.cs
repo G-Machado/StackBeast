@@ -27,14 +27,7 @@ public class EnemyRagdoll : MonoBehaviour
 
     void Start()
     {
-        initialPartsPos = new Vector3[parts.Length];
-        initialPartsRot = new Quaternion[parts.Length];
-        for (int i = 0; i < parts.Length; i++)
-        {
-            initialPartsPos[i] = parts[i].position;
-            initialPartsRot[i] = parts[i].rotation;
-        }
-
+        SetupInitiaPose();
         SetRagdoll(false);
     }
 
@@ -43,17 +36,96 @@ public class EnemyRagdoll : MonoBehaviour
         FollowItemPos();
     }
 
+
+    public void ApplyExplosion(Vector3 forceVector, Vector3 origin, float radius)
+    {
+        // Apply explosion physics effect to every part of the enemy ragdoll
+        for (int i = 0; i < parts.Length; i++)
+        {
+            parts[i].AddExplosionForce(forceVector.magnitude, origin, radius, 3, ForceMode.Impulse);
+        }
+
+        bodyRB.useGravity = false;
+        punched = true;
+        sphereCollider.enabled = false;
+    }
+
+    private void FollowItemPos()
+    {
+        // If there is no item to follow, don't run
+        if (!followItem) return;
+
+        // Check for locking distance to target
+        float distanceToItem = Vector3.Distance(followItem.transform.position, bodyRB.transform.position);
+        if (!locked && distanceToItem < (!dropped ? .5f : 3.5f))
+        {
+            locked = true;
+            SetTrails(false);
+
+            // If is dropped from player, disable enemy
+            if (dropped)
+            {
+                DropDead();
+                return;
+            }
+            else // else lock the enemy at player stack
+            {
+                SetDrag(5);
+                bodyRB.constraints = RigidbodyConstraints.FreezePosition;
+            }
+        }
+
+        // Move enemy to target position depending on state (i.e. locked or unlocked)
+        if (locked)
+        {
+            bodyRB.MovePosition(Vector3.Lerp(bodyRB.position, followItem.transform.position, lockedLerp));
+        }
+        else
+        {
+            SetDrag(Mathf.Max(5 - distanceToItem, .5f));
+            Vector3 targetDirection = followItem.transform.position - bodyRB.transform.position;
+            bodyRB.velocity =
+                Vector3.Lerp(bodyRB.velocity, targetDirection.normalized * followSpeed, followLerp);
+        }
+    }
+
+
+    // Ragdoll methods
+
+    private void SetupInitiaPose()
+    {
+        // Stores ragdoll parts inital position and rotation
+        initialPartsPos = new Vector3[parts.Length];
+        initialPartsRot = new Quaternion[parts.Length];
+        for (int i = 0; i < parts.Length; i++)
+        {
+            initialPartsPos[i] = parts[i].position;
+            initialPartsRot[i] = parts[i].rotation;
+        }
+    }
+
     public void SetRagdoll(bool mode)
     {
-
         ragActive = mode;
+
+        // Configures the ragdoll according to mode
         anim.enabled = !mode;
         for (int i = 0; i < parts.Length; i++)
         {
             parts[i].isKinematic = !mode;
         }
 
+        // Configure trail effect 
         SetTrails(mode);
+    }
+
+    private void SetDrag(float value)
+    {
+        // Configure the drag of every part of the radgoll
+        for (int i = 0; i < parts.Length; i++)
+        {
+            parts[i].drag = value;
+        }
     }
 
     private void SetTrails(bool mode )
@@ -75,62 +147,8 @@ public class EnemyRagdoll : MonoBehaviour
         }
     }
 
-    public void ApplyExplosion(Vector3 forceVector, Vector3 origin, float radius)
-    {
-        for (int i = 0; i < parts.Length; i++)
-        {
-            parts[i].AddExplosionForce(forceVector.magnitude, origin, radius, 3, ForceMode.Impulse);
-        }
 
-        bodyRB.useGravity = false;
-        punched = true;
-        sphereCollider.enabled = false;
-    }
-
-    private void SetDrag(float value)
-    {
-        for (int i = 0; i < parts.Length; i++)
-        {
-            parts[i].drag = value;
-        }
-    }
-
-    private void FollowItemPos()
-    {
-        if (!followItem) return;
-
-        // Checks for locking distance to target
-        float distanceToItem = Vector3.Distance(followItem.transform.position, bodyRB.transform.position);
-        if (!locked && distanceToItem < (!dropped ? .5f : 3.5f))
-        {
-            locked = true;
-            SetTrails(false);
-
-            if (dropped)
-            {
-                DropDead();
-                return;
-            }
-            else
-            {
-                SetDrag(5);
-                bodyRB.constraints = RigidbodyConstraints.FreezePosition;
-            }
-        }
-
-        // Move enemy to target position depending on state (i.e. locked or unlocked)
-        if (locked)
-        {
-            bodyRB.MovePosition(Vector3.Lerp(bodyRB.position, followItem.transform.position, lockedLerp));
-        }
-        else
-        {
-            SetDrag(Mathf.Max(5 - distanceToItem, .5f));
-            Vector3 targetDirection = followItem.transform.position - bodyRB.transform.position;
-            bodyRB.velocity =
-                Vector3.Lerp(bodyRB.velocity, targetDirection.normalized * followSpeed, followLerp);
-        }
-    }
+    // Drop mechanics
 
     private void DropDead()
     {
@@ -143,35 +161,41 @@ public class EnemyRagdoll : MonoBehaviour
         bodyRB.drag = 4;
         bodyRB.constraints = RigidbodyConstraints.None;
 
+        // Update enemies list from setup
         EnemiesSetup.instance.enemies.Remove(this);
 
         Invoke("ReleaseFromPool", 5f);
-        //Destroy(this.gameObject, 10f);
 
+        // Add currency to enemy collected
         UpgradeManager.instance.AddCurrency(5);
     }
+
+    public void DropToPit(float dropUpSpeed)
+    {
+        // Configure rigid body to drop
+        SetDrag(2);
+        bodyRB.constraints = RigidbodyConstraints.None;
+        bodyRB.velocity = Vector3.up * dropUpSpeed;
+
+        locked = false;
+        dropped = true;
+    }
+
+
+    // Pooling methods
 
     private void ReleaseFromPool()
     {
         EnemiesSetup.instance.enemyPool.Release(this);
     }
 
-    public void DropToPit(float dropUpSpeed)
-    {
-        SetDrag(2);
-        bodyRB.constraints = RigidbodyConstraints.None;
-        bodyRB.velocity = Vector3.up * dropUpSpeed;
-        locked = false;
-        dropped = true;
-    }
-
     public void ResetRagdoll()
     {
+        // Reset stats
         dropped = false;
         locked = false;
         punched = false;
         sphereCollider.enabled = true;
-
         gameObject.SetActive(true);
     }
 

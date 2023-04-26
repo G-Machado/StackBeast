@@ -56,7 +56,10 @@ public class JoyStickController : MonoBehaviour
             rect.anchoredPosition = Vector3.Lerp(rect.anchoredPosition, Input.mousePosition, dragLerp);
         }
 
+        // Smooth input based on lerp and targetInput
         currentInput = Vector3.ClampMagnitude(Vector3.Lerp(currentInput, targetInput, lerp), maxInput);
+
+        // Positions the joystick button
         button.transform.localPosition = currentInput * sensitivity;
     }
 

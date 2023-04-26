@@ -2302,10 +2302,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d99082bd79f344483b7c7ddf7c177d9b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  initialCount: 20
-  offset: {x: 0, y: 7, z: -1.5}
-  yInterval: 2
   itemPrefab: {fileID: 7143946654791690160, guid: 256c60540078e49a2907c7ce58ea6ede, type: 3}
+  offset: {x: 0, y: 7, z: -1.5}
+  initialCount: 20
+  yInterval: 2
   items: []
   playerRB: {fileID: 4100038320309293944}
 --- !u!4 &763196944
@@ -2730,7 +2730,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 963194225}
   m_LocalRotation: {x: 0.2694505, y: -0, z: -0, w: 0.96301425}
-  m_LocalPosition: {x: 0, y: 26.01, z: -23.72}
+  m_LocalPosition: {x: 0, y: 31.08, z: -25.55}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -3074,7 +3074,7 @@ MonoBehaviour:
   m_VertexBufferAutoSizeReduction: 0
   m_useMaxVisibleDescender: 1
   m_pageToDisplay: 1
-  m_margin: {x: 0, y: 0, z: 85.776505, w: -26.09145}
+  m_margin: {x: 0, y: 0, z: 15.442368, w: -26.09145}
   m_isUsingLegacyAnimationComponent: 0
   m_isVolumetricText: 0
   m_hasFontAssetChanged: 0
