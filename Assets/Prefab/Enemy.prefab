@@ -3126,6 +3126,18 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2f1c6655945054f5e97990a2608e3cde, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  parts:
+  - {fileID: 625772705479314997}
+  - {fileID: 7329982356650398696}
+  - {fileID: 1508659987047621169}
+  - {fileID: 2941493624902015651}
+  - {fileID: 190282086678441374}
+  - {fileID: 2826045042643078745}
+  - {fileID: 8891010567617166079}
+  - {fileID: 2385358795335626766}
+  - {fileID: 9102724371114017989}
+  - {fileID: 8931608181306801450}
+  - {fileID: 725940991194876683}
   ragActive: 0
   anim: {fileID: 3703161040765730376}
   followItem: {fileID: 0}

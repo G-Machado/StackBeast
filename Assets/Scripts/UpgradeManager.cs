@@ -15,6 +15,7 @@ public class UpgradeManager : MonoBehaviour
 
     [Header("Currency feature")]
     [SerializeField] private TextMeshProUGUI currencyDisplay;
+    [SerializeField] private Animator currencyDisplayAnim;
     [SerializeField] private int currency;
 
     [Header("Stacking Upgrades")]
@@ -25,6 +26,8 @@ public class UpgradeManager : MonoBehaviour
     {
         get { return stackLevel >= 0 ? stackUpgrades[stackLevel] : null; }
     }
+    [SerializeField] private TextMeshProUGUI stackValueDisplay;
+    [SerializeField] private Animator stackDisplayAnim;
     [SerializeField] private TextMeshProUGUI stackCostDisplay;
     [SerializeField] private SkinnedMeshRenderer skinned_renderer;
 
@@ -36,7 +39,9 @@ public class UpgradeManager : MonoBehaviour
     {
         get { return punchLevel >= 0 ? punchUpgrades[punchLevel] : null; }
     }
+    [SerializeField] private TextMeshProUGUI punchValueDisplay;
     [SerializeField] private TextMeshProUGUI punchCostDisplay;
+    [SerializeField] private Animator punchDisplasyAnim;
 
     void Start()
     {
@@ -52,7 +57,8 @@ public class UpgradeManager : MonoBehaviour
     public void AddCurrency(int ammount)
     {
         currency += ammount;
-        currencyDisplay.text = currency.ToString();
+        currencyDisplay.text = $"${currency}";
+        currencyDisplayAnim.SetTrigger("uiChange");
     }
 
     public void UpgradeStack(UpgradeArea area)
@@ -78,10 +84,14 @@ public class UpgradeManager : MonoBehaviour
         }
 
         currency -= currentStackStats.cost;
-        PlayerMovement.instance.GetComponentsInChildren<SkinnedMeshRenderer>()[0].material.color =
+        currencyDisplay.text = $"${currency}";
+        currencyDisplayAnim.SetTrigger("uiChange");
+
+        skinned_renderer.material.color =
             currentStackStats.color;
 
-        UpdateUIStats();
+        stackCostDisplay.text = $"${stackUpgrades[Mathf.Min(stackUpgrades.Count - 1, stackLevel + 1)].cost}";
+        //UpdateUIStats();
 
         if (stackLevel >= stackUpgrades.Count - 1)
         {
@@ -102,8 +112,16 @@ public class UpgradeManager : MonoBehaviour
             return;
         }
 
+        if (area) area.ProcessPurchase();
+
         currency -= currentPunchStats.cost;
-        UpdateUIStats();
+        currencyDisplay.text = $"${currency}";
+        currencyDisplayAnim.SetTrigger("uiChange");
+
+        punchCostDisplay.text = $"${punchUpgrades[Mathf.Min(punchUpgrades.Count - 1, punchLevel + 1)].cost}";
+        punchValueDisplay.text = $"{punchLevel + 1}";
+        punchDisplasyAnim.SetTrigger("uiChange");
+        //UpdateUIStats();
 
         if (punchLevel >= punchUpgrades.Count - 1)
         {
@@ -112,12 +130,17 @@ public class UpgradeManager : MonoBehaviour
         }
     }
 
-    private void UpdateUIStats()
+    public void UpdateUIStats()
     {
-        currencyDisplay.text = currency.ToString();
-        stackCostDisplay.text = stackUpgrades[Mathf.Min(stackUpgrades.Count-1 , stackLevel+1)].cost.ToString();
-        punchCostDisplay.text = punchUpgrades[Mathf.Min(punchUpgrades.Count-1 , punchLevel+1)].cost.ToString();
+        stackValueDisplay.text = $"{PlayerMovement.instance.enemiesStacked.Count}/{currentStackStats.maxStack}";
+        stackDisplayAnim.SetTrigger("uiChange");
+        //currencyDisplay.text = currency.ToString();
+        //stackCostDisplay.text = $"${stackUpgrades[Mathf.Min(stackUpgrades.Count - 1, stackLevel + 1)].cost}";
+        //stackValueDisplay.text = $"{PlayerMovement.instance.enemiesStacked.Count}/{currentStackStats.maxStack}";
+        //punchCostDisplay.text = $"${punchUpgrades[Mathf.Min(punchUpgrades.Count - 1, punchLevel + 1)].cost}";
+        //punchValueDisplay.text = $"{punchLevel + 1}";
     }
+
 }
 
 [System.Serializable]

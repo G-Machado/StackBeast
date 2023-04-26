@@ -176,6 +176,7 @@ public class PlayerMovement : MonoBehaviour
             currentEnemy.followItem = itemsSetup.items[followIndex].transform;
 
             enemiesStacked.Add(currentEnemy);
+            UpgradeManager.instance.UpdateUIStats();
 
             return true;
         }
@@ -219,5 +220,6 @@ public class PlayerMovement : MonoBehaviour
         toDrop.DropToPit(dropForce * dropDirection.magnitude);
 
         enemiesStacked.RemoveAt(enemiesStacked.Count - 1);
+        UpgradeManager.instance.UpdateUIStats();
     }
 }

@@ -5,7 +5,10 @@ using static UnityEngine.UI.Image;
 
 public class EnemyRagdoll : MonoBehaviour
 {
-    private Rigidbody[] parts;
+    [SerializeField]private Rigidbody[] parts;
+    private Vector3[] initialPartsPos;
+    private Quaternion[] initialPartsRot;
+
     [SerializeField] private bool ragActive = false;
     [SerializeField] private Animator anim;
     public Transform followItem;
@@ -24,7 +27,14 @@ public class EnemyRagdoll : MonoBehaviour
 
     void Start()
     {
-        parts = GetComponentsInChildren<Rigidbody>();
+        initialPartsPos = new Vector3[parts.Length];
+        initialPartsRot = new Quaternion[parts.Length];
+        for (int i = 0; i < parts.Length; i++)
+        {
+            initialPartsPos[i] = parts[i].position;
+            initialPartsRot[i] = parts[i].rotation;
+        }
+
         SetRagdoll(false);
     }
 
@@ -35,6 +45,7 @@ public class EnemyRagdoll : MonoBehaviour
 
     public void SetRagdoll(bool mode)
     {
+
         ragActive = mode;
         anim.enabled = !mode;
         for (int i = 0; i < parts.Length; i++)
@@ -134,9 +145,15 @@ public class EnemyRagdoll : MonoBehaviour
 
         EnemiesSetup.instance.enemies.Remove(this);
 
-        Destroy(this.gameObject, 10f);
+        Invoke("ReleaseFromPool", 5f);
+        //Destroy(this.gameObject, 10f);
 
         UpgradeManager.instance.AddCurrency(5);
+    }
+
+    private void ReleaseFromPool()
+    {
+        EnemiesSetup.instance.enemyPool.Release(this);
     }
 
     public void DropToPit(float dropUpSpeed)
@@ -146,5 +163,30 @@ public class EnemyRagdoll : MonoBehaviour
         bodyRB.velocity = Vector3.up * dropUpSpeed;
         locked = false;
         dropped = true;
+    }
+
+    public void ResetRagdoll()
+    {
+        dropped = false;
+        locked = false;
+        punched = false;
+        sphereCollider.enabled = true;
+
+        gameObject.SetActive(true);
+    }
+
+    public void FreezeRagdoll()
+    {
+        gameObject.SetActive(false);
+
+        // Turn off ragdoll properties
+        SetRagdoll(false);
+
+        // Resets position of ragdoll parts
+        for (int i = 0; i < parts.Length; i++)
+        {
+            parts[i].gameObject.transform.position = initialPartsPos[i];
+            parts[i].gameObject.transform.rotation = initialPartsRot[i];
+        }
     }
 }
